@@ -4,10 +4,12 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from datetime import datetime
 from dotenv import load_dotenv
+import shutil
 
 load_dotenv()
 
 photo_path = os.environ.get("PHOTO_PATH")
+uploaded_path = os.environ.get("UPLOADED_PATH")
 
 def get_exif_datetime(image_path):
     """ 画像のEXIFデータから撮影日時を取得 """
@@ -32,7 +34,7 @@ def extract_serial_number(filename):
         return match.group(1)  # 例: "00002"
     return None  # 連番なし
 
-def rename_photos(directory):
+def rename_photos(directory, uploaded_dir):
     """ 指定ディレクトリ内の写真を撮影日時でリネーム """
     for filename in os.listdir(directory):
         if filename.lower().endswith(".jpg"):  # JPGファイルのみ対象
@@ -57,10 +59,12 @@ def rename_photos(directory):
 
                 # ファイル名をリネーム
                 os.rename(file_path, new_file_path)
+
+                shutil.copy2(file_path, uploaded_dir + "/" + new_filename)
                 print(f"リネーム: {filename} → {new_filename}")
 
             else:
                 print(f"スキップ: {filename} の撮影日時が取得できませんでした")
 
 if __name__ == "__main__":
-    rename_photos(photo_path)
+    rename_photos(photo_path, uploaded_path)
